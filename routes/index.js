@@ -1,45 +1,37 @@
 // eslint-disable-next-line no-unused-vars
-import { Express } from 'express'; // Importing the Express module for routing functionality.
-import AppController from '../controllers/AppController'; // Importing the main controller for application status and stats.
-import AuthController from '../controllers/AuthController'; // Controller for handling authentication actions.
-import UsersController from '../controllers/UsersController'; // Controller for user-related actions such as creating and fetching user data.
-import FilesController from '../controllers/FilesController'; // Controller for managing file uploads and related actions.
-import { basicAuthenticate, xTokenAuthenticate } from '../middlewares/auth'; // Importing authentication middleware for different levels of security.
-import { APIError, errorResponse } from '../middlewares/error'; // Importing error handling utilities to format error responses properly.
+import { Express } from 'express';
+import AppController from '../controllers/AppController';
+import AuthController from '../controllers/AuthController';
+import UsersController from '../controllers/UsersController';
+import FilesController from '../controllers/FilesController';
+import { basicAuthenticate, xTokenAuthenticate } from '../middlewares/auth';
+import { APIError, errorResponse } from '../middlewares/error';
 
 /**
- * This function sets up all the API routes with their corresponding handlers in the provided Express app.
- * @param {Express} api - The Express application instance to inject the routes into.
+ * Injecting routes with their handlers to the given Express application.
+ * @param {Express} api
  */
 const injectRoutes = (api) => {
-  // App-related routes
-  api.get('/status', AppController.getStatus); // Route to check the status of the server.
-  api.get('/stats', AppController.getStats); // Route to retrieve server statistics.
+  api.get('/status', AppController.getStatus);
+  api.get('/stats', AppController.getStats);
 
-  // Authentication routes
-  api.get('/connect', basicAuthenticate, AuthController.getConnect); // Route to authenticate a user using basic auth.
-  api.get('/disconnect', xTokenAuthenticate, AuthController.getDisconnect); // Route to disconnect a user using token-based auth.
+  api.get('/connect', basicAuthenticate, AuthController.getConnect);
+  api.get('/disconnect', xTokenAuthenticate, AuthController.getDisconnect);
 
-  // User-related routes
-  api.post('/users', UsersController.postNew); // Route to create a new user.
-  api.get('/users/me', xTokenAuthenticate, UsersController.getMe); // Route to fetch the authenticated user's data.
+  api.post('/users', UsersController.postNew);
+  api.get('/users/me', xTokenAuthenticate, UsersController.getMe);
 
-  // File-related routes
-  api.post('/files', xTokenAuthenticate, FilesController.postUpload); // Route to upload a file.
-  api.get('/files/:id', xTokenAuthenticate, FilesController.getShow); // Route to get details of a specific file.
-  api.get('/files', xTokenAuthenticate, FilesController.getIndex); // Route to list all files.
-  api.put('/files/:id/publish', xTokenAuthenticate, FilesController.putPublish); // Route to publish a file.
-  api.put('/files/:id/unpublish', xTokenAuthenticate, FilesController.putUnpublish); // Route to unpublish a file.
-  api.get('/files/:id/data', FilesController.getFile); // Route to fetch the raw data of a file.
+  api.post('/files', xTokenAuthenticate, FilesController.postUpload);
+  api.get('/files/:id', xTokenAuthenticate, FilesController.getShow);
+  api.get('/files', xTokenAuthenticate, FilesController.getIndex);
+  api.put('/files/:id/publish', xTokenAuthenticate, FilesController.putPublish);
+  api.put('/files/:id/unpublish', xTokenAuthenticate, FilesController.putUnpublish);
+  api.get('/files/:id/data', FilesController.getFile);
 
-  // Catch-all route to handle undefined endpoints with an error message.
   api.all('*', (req, res, next) => {
-    errorResponse(new APIError(404, `Cannot ${req.method} ${req.url}`), req, res, next); // Handle any unrecognized routes with a 404 error.
+    errorResponse(new APIError(404, `Cannot ${req.method} ${req.url}`), req, res, next);
   });
-
-  // Error handling middleware, ensuring that all errors are properly formatted and sent in the response.
   api.use(errorResponse);
 };
 
-export default injectRoutes; // Exporting the function to be used in the server setup.
-
+export default injectRoutes;
